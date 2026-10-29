@@ -1,0 +1,706 @@
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  .wrap{background:#0a0a0a;min-height:100vh;padding:1.25rem;font-family:'Segoe UI',system-ui,sans-serif;color:#f0f0f0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px}
+  .logo{font-size:20px;font-weight:700;color:#c6f135;letter-spacing:-.5px}
+  .logo span{color:#f0f0f0}
+  .meta{font-size:11.5px;color:#666;letter-spacing:.04em}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:1.5rem}
+  .stat{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:.7rem .5rem;text-align:center}
+  .stat .sv{font-size:20px;font-weight:700;color:#c6f135}
+  .stat .sl{font-size:10px;color:#555;margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+  .tab{background:#111;border:1px solid #222;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;color:#666;font-weight:500;transition:all .15s}
+  .tab.on{background:#c6f135;color:#0a0a0a;border-color:#c6f135}
+  .sec{display:none}.sec.on{display:block}
+  .phase-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.4rem 1rem;margin-bottom:.6rem;border-radius:6px}
+  .ph1{background:#1a2200;color:#c6f135;border:1px solid #2d3d00}
+  .ph2{background:#1a0a00;color:#ff6b2b;border:1px solid #3d1a00}
+  .day-card{background:#111;border:1px solid #1e1e1e;border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .day-head{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;cursor:pointer;transition:background .12s}
+  .day-head:hover{background:#161616}
+  .dnum{font-size:12px;font-weight:700;color:#c6f135;min-width:44px}
+  .dtheme{font-size:12.5px;color:#ccc;flex:1;font-weight:500}
+  .dtype-pills{display:flex;gap:4px;flex-wrap:wrap}
+  .pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+  .pc{background:#0d2200;color:#c6f135;border:1px solid #2a4a00}
+  .pr{background:#1a0022;color:#d68fff;border:1px solid #3a0055}
+  .ps{background:#001a22;color:#6fd7ff;border:1px solid #004455}
+  .chv{color:#444;font-size:13px;transition:transform .18s;margin-left:4px}
+  .chv.op{transform:rotate(180deg)}
+  .day-body{display:none;border-top:1px solid #1e1e1e}
+  .day-body.op{display:block}
+  .post-row{display:grid;grid-template-columns:80px 90px 1fr;gap:0;border-bottom:1px solid #181818}
+  .post-row:last-of-type{border-bottom:none}
+  .pr-time{padding:.6rem .75rem;font-size:11px;color:#555;font-weight:600;border-right:1px solid #181818;display:flex;align-items:center}
+  .pr-type{padding:.6rem .75rem;border-right:1px solid #181818;display:flex;align-items:center}
+  .pr-content{padding:.6rem .75rem}
+  .pr-product{font-size:11.5px;font-weight:600;color:#c6f135;margin-bottom:2px}
+  .pr-topic{font-size:12px;color:#999;line-height:1.45}
+  .story-section{background:#0d0d0d;border-top:1px solid #1e1e1e;padding:.75rem 1rem}
+  .story-label{font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+  .story-item{font-size:12px;color:#777;padding:3px 0;padding-left:12px;position:relative;line-height:1.45}
+  .story-item::before{content:"›";position:absolute;left:0;color:#c6f135;font-size:14px;line-height:1.2}
+  .week-sep{font-size:10px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.1em;padding:.5rem 0 .3rem;border-top:1px solid #1a1a1a;margin-top:.5rem}
+  .hook-wrap{display:grid;gap:6px}
+  .hook-cat{font-size:11px;font-weight:700;color:#c6f135;text-transform:uppercase;letter-spacing:.07em;padding:.6rem 0 .3rem;border-bottom:1px solid #1e1e1e;margin-bottom:2px}
+  .hook-item{background:#111;border:1px solid #1e1e1e;border-left:3px solid #c6f135;border-radius:6px;padding:.5rem .8rem;font-size:12.5px;color:#bbb;line-height:1.5}
+  .hook-num{color:#444;font-size:10px;margin-right:6px;font-weight:700}
+  .cta-item{background:#111;border:1px solid #1e1e1e;border-left:3px solid #ff6b2b;border-radius:6px;padding:.5rem .8rem;font-size:12.5px;color:#bbb;line-height:1.5;margin-bottom:5px}
+  .prod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+  .prod-card{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:.85rem 1rem}
+  .prod-cat{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
+  .cat-t{background:#0d2200;color:#c6f135}
+  .cat-a{background:#001a22;color:#6fd7ff}
+  .cat-f{background:#1a0022;color:#d68fff}
+  .cat-d{background:#1a0a00;color:#ff6b2b}
+  .prod-name{font-size:12.5px;font-weight:600;color:#e0e0e0;margin-bottom:5px}
+  .prod-days{font-size:11px;color:#555;line-height:1.55}
+  .prod-days span{color:#888}
+  .sched-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+  .sched-slot{border-radius:12px;padding:.85rem 1rem;position:relative;overflow:hidden}
+  .sched-slot::before{content:'';position:absolute;inset:0;opacity:.08}
+  .ss-us1{background:#0d1a00;border:1px solid #2a4000}
+  .ss-uk{background:#00101a;border:1px solid #004455}
+  .ss-us2{background:#1a0000;border:1px solid #440000}
+  .ss-time{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:2px}
+  .ss-us1 .ss-time{color:#c6f135}
+  .ss-uk .ss-time{color:#6fd7ff}
+  .ss-us2 .ss-time{color:#ff6b2b}
+  .ss-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+  .ss-us1 .ss-label{color:#7aaa20}
+  .ss-uk .ss-label{color:#3fa8cc}
+  .ss-us2 .ss-label{color:#cc4a20}
+  .ss-target{font-size:11px;color:#666;line-height:1.5}
+  .ss-target strong{color:#999}
+  .ss-why{font-size:11px;color:#555;margin-top:.5rem;line-height:1.45;border-top:1px solid #1e1e1e;padding-top:.5rem}
+  .aud-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:1rem}
+  .aud-card{background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:1rem}
+  .aud-flag{font-size:22px;margin-bottom:.4rem}
+  .aud-name{font-size:13px;font-weight:700;color:#e0e0e0;margin-bottom:.4rem}
+  .aud-tag{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:10px;margin-bottom:.6rem}
+  .at-primary{background:#0d2200;color:#c6f135;border:1px solid #2a4a00}
+  .at-secondary{background:#001a22;color:#6fd7ff;border:1px solid #004455}
+  .at-tertiary{background:#1a0a00;color:#ff6b2b;border:1px solid #3d1a00}
+  .aud-desc{font-size:11.5px;color:#777;line-height:1.55}
+  .aud-desc li{margin-bottom:3px}
+  .aud-section-title{font-size:11px;font-weight:700;color:#c6f135;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .4rem}
+  .post-badge{display:inline-flex;align-items:center;gap:5px;background:#0d1500;border:1px solid #1e3300;border-radius:20px;padding:3px 10px;font-size:10.5px;color:#c6f135;font-weight:600;margin:.2rem .2rem 0 0}
+  .post-badge.uk{background:#001520;border-color:#003344;color:#6fd7ff}
+  .post-badge.us2{background:#150500;border-color:#330d00;color:#ff6b2b}
+  .time-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .td-us1{background:#c6f135}.td-uk{background:#6fd7ff}.td-us2{background:#ff6b2b}
+
+  .fb{background:#111;border:1px solid #222;border-radius:20px;padding:4px 13px;font-size:11.5px;cursor:pointer;color:#555;font-weight:600;transition:all .12s}
+  .fb.on{background:#c6f135;color:#0a0a0a;border-color:#c6f135}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+  /* 90-day upload plan */
+  .p90-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+  .p90-note{font-size:11.5px;color:#666;line-height:1.7;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem}
+  .p90-note strong{color:#ddd}
+  .p90-month{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+  .p90-row{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:10px;background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:.55rem 1rem;margin-bottom:6px}
+  .p90-row.light{border-left:3px solid #6fd7ff}
+  .p90-row.heavy{border-left:3px solid #c6f135}
+  .p90-row.mid{border-left:3px solid #ff6b2b}
+  .p90-day{font-size:12px;font-weight:700;color:#c6f135}
+  .p90-what{display:flex;gap:6px;flex-wrap:wrap}
+  .p90-total{font-size:12px;font-weight:700;color:#e0e0e0;text-align:right}
+  .p90-total small{display:block;font-size:9px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .p90-head{display:grid;grid-template-columns:70px 1fr 70px;gap:10px;padding:0 1rem .3rem;font-size:10px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:.07em}
+  .p90-head span:last-child{text-align:right}
+  .p90-week{font-size:10px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.1em;padding:.5rem 0 .3rem;display:flex;justify-content:space-between}
+  .p90-week em{font-style:normal;color:#555}
+  @media(max-width:600px){.p90-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<h2 class="sr-only">35-day Instagram content calendar: lime and black theme, 80 carousels, 20 reels, 30 single posts mapped to every product</h2>
+
+<div class="wrap">
+
+<div class="topbar">
+  <div class="logo">35<span>DAY</span> PLAN</div>
+  <div class="meta">80 Carousels · 20 Reels · 30 Singles · PKT Times · 3-Market Strategy</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="sv">130</div><div class="sl">Total Posts</div></div>
+  <div class="stat"><div class="sv">80</div><div class="sl">Carousels</div></div>
+  <div class="stat"><div class="sv">20</div><div class="sl">Reels</div></div>
+  <div class="stat"><div class="sv">30</div><div class="sl">Singles</div></div>
+  <div class="stat"><div class="sv">21</div><div class="sl">Products</div></div>
+  <div class="stat"><div class="sv">35</div><div class="sl">Days</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="showTab('cal',this)">Calendar</button>
+  <button class="tab" onclick="showTab('schedule',this)">⏰ Post Schedule</button>
+  <button class="tab" onclick="showTab('products',this)">Products</button>
+  <button class="tab" onclick="showTab('hooks',this)">Hook Bank</button>
+  <button class="tab" onclick="showTab('ctas',this)">CTA Bank</button>
+  <button class="tab" onclick="showTab('plan90',this)">📅 90-Day Upload Plan</button>
+</div>
+
+<div id="cal" class="sec on">
+  <div class="filter-bar">
+    <button class="fb on" onclick="filt('all',this)">All Days</button>
+    <button class="fb" onclick="filt('g',this)">Phase 1 · Growth</button>
+    <button class="fb" onclick="filt('m',this)">Phase 2 · Monetize</button>
+  </div>
+  <div id="dayList"></div>
+</div>
+
+<div id="schedule" class="sec">
+  <div style="margin-bottom:1rem">
+    <div style="font-size:11px;color:#555;line-height:1.7;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem">
+      <span style="color:#c6f135;font-weight:700">Strategy:</span> You post from Pakistan but target <strong style="color:#ddd">US + UK audiences</strong> — the world's highest-paying Instagram markets. Each post hits a different market at peak scroll time.
+    </div>
+  </div>
+
+  <div class="sched-banner">
+    <div class="sched-slot ss-us1">
+      <div class="ss-label">Post 1 · US Morning</div>
+      <div class="ss-time">5:00 PM PKT</div>
+      <div class="ss-target"><strong>New York:</strong> 8:00 AM EST<br><strong>Los Angeles:</strong> 5:00 AM PST</div>
+      <div class="ss-why">🌅 Hits East Coast US right as they wake up and scroll in bed or during their morning commute — highest organic reach window of the day.</div>
+    </div>
+    <div class="sched-slot ss-uk">
+      <div class="ss-label">Post 2 · UK Prime Time</div>
+      <div class="ss-time">11:00 PM PKT</div>
+      <div class="ss-target"><strong>London:</strong> 7:00 PM GMT</div>
+      <div class="ss-why">🛋️ Peak evening "prime time" for the UK — people unwinding on the couch after dinner. Engagement rates are 40–60% higher than daytime posts.</div>
+    </div>
+    <div class="sched-slot ss-us2">
+      <div class="ss-label">Post 3 · US Prime Time</div>
+      <div class="ss-time">3:00 AM PKT</div>
+      <div class="ss-target"><strong>New York:</strong> 6:00 PM EST<br><strong>Los Angeles:</strong> 3:00 PM PST</div>
+      <div class="ss-why">🔥 Massive US East Coast audience getting off work/school + West Coast afternoon break. The single highest-converting window for US audience sales.</div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .5rem">Target Audience Breakdown</div>
+
+  <div class="aud-grid">
+    <div class="aud-card">
+      <div class="aud-flag">🇺🇸</div>
+      <div class="aud-name">United States — Primary Market</div>
+      <span class="aud-tag at-primary">Posts 1 &amp; 3 · 5 PM + 3 AM PKT</span>
+      <div class="aud-desc">
+        <ul style="padding-left:14px">
+          <li>Age 18–35, side-hustle &amp; entrepreneurship culture</li>
+          <li>High disposable income — willing to pay for digital courses</li>
+          <li>Active on Instagram Reels &amp; carousel education content</li>
+          <li>Responds to income proof, lifestyle, and freedom messaging</li>
+          <li>Key cities: NYC, LA, Miami, Atlanta, Chicago</li>
+        </ul>
+      </div>
+      <div class="aud-section-title">Post Times (Their Clock)</div>
+      <span class="post-badge"><span class="time-dot td-us1"></span>8:00 AM EST — Morning Scroll</span>
+      <span class="post-badge us2"><span class="time-dot td-us2"></span>6:00 PM EST — After Work</span>
+    </div>
+    <div class="aud-card">
+      <div class="aud-flag">🇬🇧</div>
+      <div class="aud-name">United Kingdom — Secondary Market</div>
+      <span class="aud-tag at-secondary">Post 2 · 11:00 PM PKT</span>
+      <div class="aud-desc">
+        <ul style="padding-left:14px">
+          <li>Age 20–38, strong "make money online" community</li>
+          <li>High average income &amp; strong GBP purchasing power</li>
+          <li>Engages heavily with trading, crypto &amp; passive income content</li>
+          <li>Responds to authority, case studies &amp; UK-specific success stories</li>
+          <li>Key cities: London, Manchester, Birmingham, Leeds</li>
+        </ul>
+      </div>
+      <div class="aud-section-title">Post Time (Their Clock)</div>
+      <span class="post-badge uk"><span class="time-dot td-uk"></span>7:00 PM GMT — Evening Prime Time</span>
+    </div>
+    <div class="aud-card">
+      <div class="aud-flag">🌍</div>
+      <div class="aud-name">Global English Audience — Bonus Reach</div>
+      <span class="aud-tag at-tertiary">All 3 Posts · Passive Benefit</span>
+      <div class="aud-desc">
+        <ul style="padding-left:14px">
+          <li>Canada, Australia, South Africa, India (English market)</li>
+          <li>UAE &amp; Gulf region — very active on business/income content</li>
+          <li>All 3 post times cover different global time zones</li>
+          <li>Your 24-hour posting rhythm builds global authority signals</li>
+          <li>Instagram algorithm rewards consistent multi-timezone engagement</li>
+        </ul>
+      </div>
+      <div class="aud-section-title">Why It Works</div>
+      <div style="font-size:11px;color:#666;line-height:1.5">Posting across 3 time windows tells Instagram's algorithm your content is globally relevant — boosting Explore page distribution to all markets simultaneously.</div>
+    </div>
+  </div>
+
+  <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:.85rem 1rem;margin-top:.5rem">
+    <div style="font-size:10px;font-weight:700;color:#c6f135;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">⚡ Quick Reference — PKT Posting Alarm Times</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px">
+      <div><span style="color:#c6f135;font-weight:700">5:00 PM PKT</span><br><span style="color:#555">US Morning Post</span></div>
+      <div><span style="color:#6fd7ff;font-weight:700">11:00 PM PKT</span><br><span style="color:#555">UK Evening Post</span></div>
+      <div><span style="color:#ff6b2b;font-weight:700">3:00 AM PKT</span><br><span style="color:#555">US Prime Time Post</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="products" class="sec">
+  <div class="prod-grid" id="prodGrid"></div>
+</div>
+
+<div id="hooks" class="sec">
+  <div class="hook-wrap" id="hookList"></div>
+</div>
+
+<div id="ctas" class="sec">
+  <div id="ctaList"></div>
+</div>
+
+<div id="plan90" class="sec">
+  <div class="p90-stats" id="p90Stats"></div>
+  <div class="p90-note">
+    <span style="color:#c6f135;font-weight:700">How to read this:</span> a 30-day upload rhythm that repeats <strong>3 times</strong> to cover <strong>90 days</strong>. Every day has <strong>1 Post</strong>; most days add <strong>1–2 Carousels</strong>, and a lighter <strong>"Post only"</strong> day lands every 7th day to give you a breather. Pick topics for each slot from the 35-day Calendar, Hook Bank and CTA Bank.
+    <div style="margin-top:.5rem">
+      <span class="pill pc">Carousel</span> <span class="pill ps">Post</span>
+      &nbsp;·&nbsp;<span style="color:#6fd7ff">■</span> light day (1 upload) &nbsp;<span style="color:#ff6b2b">■</span> medium (2) &nbsp;<span style="color:#c6f135">■</span> heavy (3)
+    </div>
+  </div>
+  <div class="tabs" style="margin-bottom:1rem">
+    <button class="fb on" onclick="filt90('all',this)">All 90 Days</button>
+    <button class="fb" onclick="filt90(0,this)">Days 1–30</button>
+    <button class="fb" onclick="filt90(1,this)">Days 31–60</button>
+    <button class="fb" onclick="filt90(2,this)">Days 61–90</button>
+  </div>
+  <div id="p90List"></div>
+</div>
+
+</div>
+
+<script>
+const C='carousel',R='reel',S='single';
+
+const DAYS=[
+{d:1,ph:'g',theme:'Who you are + the income stack you teach',posts:[
+  {t:'5:00 PM',type:C,prod:'Brand intro',topic:'5 income streams: Trading + AI + Digital Products in 2026'},
+  {t:'11:00 PM',type:C,prod:'Brand intro',topic:'The 3-level money system: Trading → AI → Digital Products'},
+  {t:'3:00 AM',type:S,prod:'Brand intro',topic:'Bold quote post about escaping the 9-5 through trading and AI'},
+],story:'Introduce yourself. Poll: "Which income stream are you most interested in?" — Trading / AI / Digital Products / All 3'},
+
+{d:2,ph:'g',theme:'Price action basics — trading authority begins',posts:[
+  {t:'5:00 PM',type:C,prod:'Price Action Mastery Course',topic:'What is price action trading? Beginner breakdown — 8 slides'},
+  {t:'11:00 PM',type:R,prod:'Price Action Mastery Course',topic:'60-sec: How to read a candle in 3 steps — chart screen recording'},
+  {t:'3:00 AM',type:S,prod:'Price Action Mastery Course',topic:'Chart screenshot: "Spot the setup" — answer in DMs'},
+],story:'Quiz: What does a doji candle mean? Give 3 options. Answer revealed in next story'},
+
+{d:3,ph:'g',theme:'AI automation reaches the masses',posts:[
+  {t:'5:00 PM',type:C,prod:'Instagram Automation',topic:'How I post 4x a day on Instagram without touching my phone — full breakdown'},
+  {t:'11:00 PM',type:C,prod:'YouTube Automation',topic:'Faceless YouTube channel making money with zero on-camera time — the system'},
+  {t:'3:00 AM',type:S,prod:'AI Automation for Small Business',topic:'Meme: "Me before AI vs me after AI" — split graphic relatable format'},
+],story:'Poll: "Do you currently use AI in your business?" Yes / No / What\'s AI lol'},
+
+{d:4,ph:'g',theme:'ICT & Smart Money Concepts — niche authority',posts:[
+  {t:'5:00 PM',type:C,prod:'ICT & SMC Mastery Course',topic:'What is Smart Money? ICT concepts explained for beginners — 8 slides'},
+  {t:'11:00 PM',type:C,prod:'ICT & SMC Mastery Course',topic:'5 ICT concepts every trader must know before placing a trade'},
+  {t:'3:00 AM',type:S,prod:'ICT & SMC Mastery Course',topic:'Quote: "The market moves to take your stops — not randomly"'},
+],story:'Quiz: "What does FVG stand for?" 3 options. Answer via DM keyword'},
+
+{d:5,ph:'g',theme:'AI freelancing — beginner income entry point',posts:[
+  {t:'5:00 PM',type:C,prod:'AI Lead Generation',topic:'How to find 100 qualified leads per day using AI — fully automated'},
+  {t:'11:00 PM',type:R,prod:'Become a Professional Coder With AI',topic:'60-sec: Landing a $500 client with AI coding — zero experience shown'},
+  {t:'3:00 AM',type:C,prod:'AI Copywriting',topic:'5 AI freelancing skills companies are paying top dollar for in 2026'},
+],story:'Poll: "Would you freelance with AI if you knew how?" Yes / Already am / Not sure'},
+
+{d:6,ph:'g',theme:'Digital products — passive income education',posts:[
+  {t:'5:00 PM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'What are digital products and why they\'re the best business model in 2026'},
+  {t:'11:00 PM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'7 digital products you can create with AI this weekend — with examples'},
+  {t:'3:00 AM',type:S,prod:'Brand Empire',topic:'Quote: "Your knowledge is a product. Stop giving it away for free."'},
+],story:'Poll: "Have you ever sold a digital product?" Yes / No / Working on it'},
+
+{d:7,ph:'g',theme:'Week 1 recap — engagement storm',posts:[
+  {t:'5:00 PM',type:R,prod:'Brand intro',topic:'Week 1 recap reel — best moments montage with income system overview'},
+  {t:'11:00 PM',type:C,prod:'Brand intro',topic:'The 2026 online income roadmap: Trading + AI + Digital Products combined'},
+  {t:'3:00 AM',type:S,prod:'Brand intro',topic:'Engagement post: Pick your path — Trading / AI / Digital Products / All 3'},
+],story:'Q&A box: "Ask me anything about trading or AI income." Answer top questions in stories'},
+
+{d:8,ph:'g',theme:'TradingView setup — tools education',posts:[
+  {t:'5:00 PM',type:C,prod:'Professional TradingView Mastery',topic:'TradingView beginner setup: How to build a professional chart from scratch'},
+  {t:'11:00 PM',type:C,prod:'Trading Tool Kit',topic:'5 TradingView indicators actually worth using — and 3 to delete forever'},
+  {t:'3:00 AM',type:R,prod:'Professional TradingView Mastery',topic:'60-sec: Full TradingView setup walkthrough — screen recording live'},
+],story:'Poll: "Do you use TradingView?" Yes-paid / Yes-free / Never heard of it'},
+
+{d:9,ph:'g',theme:'YouTube + social automation deep dive',posts:[
+  {t:'5:00 PM',type:C,prod:'YouTube Automation',topic:'5-step YouTube automation workflow: Script → Voiceover → Visuals → Edit → Upload with AI'},
+  {t:'11:00 PM',type:C,prod:'TikTok Automation',topic:'TikTok automation: How to run a viral account without creating daily content'},
+  {t:'3:00 AM',type:S,prod:'YouTube Automation',topic:'Stat post: Faceless YouTube channels made $47M+ in ad revenue last year'},
+],story:'Poll: "Which platform do you want to grow first?" YouTube / TikTok / Instagram / Pinterest'},
+
+{d:10,ph:'g',theme:'Multi-platform automation system',posts:[
+  {t:'5:00 PM',type:C,prod:'Instagram Automation',topic:'The content repurposing system: 1 post → 6 platforms fully automated'},
+  {t:'11:00 PM',type:R,prod:'Instagram Automation',topic:'60-sec: Full Instagram automation setup screen recording — tools revealed'},
+  {t:'3:00 AM',type:C,prod:'Pinterest Automation',topic:'Pinterest + Snapchat + Twitter automation — the underrated income trio'},
+],story:'Slider: "Rate your automation knowledge 0–10." Then DM keyword for the free tool list'},
+
+{d:11,ph:'g',theme:'AI copywriting + lead generation',posts:[
+  {t:'5:00 PM',type:C,prod:'AI Copywriting',topic:'How AI writes better copy than most humans — and how you use it for clients'},
+  {t:'11:00 PM',type:C,prod:'AI Lead Generation',topic:'AI lead generation: 100 qualified leads per day on full autopilot — breakdown'},
+  {t:'3:00 AM',type:S,prod:'AI Copywriting',topic:'Quote: "The best salesperson in 2026 is the one with the best AI."'},
+],story:'Before/after slide: Human-written copy vs AI copy — ask audience to guess which is which'},
+
+{d:12,ph:'g',theme:'Design system + freelance authority',posts:[
+  {t:'5:00 PM',type:C,prod:'Freelance Client Design System',topic:'How to deliver premium design work with AI — clients paying $1,500+ per project'},
+  {t:'11:00 PM',type:R,prod:'Freelance Client Design System',topic:'60-sec: Full brand identity designed in 20 minutes using AI — screen recording'},
+  {t:'3:00 AM',type:S,prod:'Freelance Client Design System',topic:'Before/after: Client logo before AI vs client logo after AI — which looks expensive?'},
+],story:'Poll: "Can you spot AI-generated design?" Yes always / Sometimes / No idea'},
+
+{d:13,ph:'g',theme:'Digital product creation — the how-to',posts:[
+  {t:'5:00 PM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'Idea to first sale in 72 hours — full AI product creation process step by step'},
+  {t:'11:00 PM',type:R,prod:'How To Create High Quality Digital Products With AI',topic:'60-sec: Creating a digital product in 24 hours — time-lapse style process reel'},
+  {t:'3:00 AM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'10 best-selling digital product types of 2026 — ranked with income potential'},
+],story:'Poll: "What stops you from creating a digital product?" Time / Skills / Ideas / Nothing'},
+
+{d:14,ph:'g',theme:'Week 2 wrap — top questions answered',posts:[
+  {t:'5:00 PM',type:R,prod:'Brand intro',topic:'Week 2 recap reel — everything you missed and what\'s coming next week'},
+  {t:'11:00 PM',type:C,prod:'Brand intro',topic:'Top 10 questions from this week — trading + AI + digital products answered'},
+  {t:'3:00 AM',type:S,prod:'Brand intro',topic:'Engagement: "What do you want most — Freedom / Wealth / Time / All 3?"'},
+],story:'Q&A: Answer top DMs publicly in stories. Build community connection'},
+
+{d:15,ph:'g',theme:'Complete 1-Strategy system — deep authority',posts:[
+  {t:'5:00 PM',type:C,prod:'Complete 1 Strategy Trading System',topic:'The complete 1-strategy system: Stop using 10 strategies — master this one'},
+  {t:'11:00 PM',type:C,prod:'Complete 1 Strategy Trading System',topic:'How one setup works across Forex, Crypto, and Indices — same rules everywhere'},
+  {t:'3:00 AM',type:C,prod:'Complete 1 Strategy Trading System',topic:'The psychology of staying with 1 strategy — why most traders quit too early'},
+],story:'Poll: "How many strategies do you currently use?" 1 / 2–3 / 4+ / None'},
+
+{d:16,ph:'g',theme:'Trading Tool Kit — professional setup',posts:[
+  {t:'5:00 PM',type:C,prod:'Trading Tool Kit',topic:'Every tool a serious trader needs in 2026 — full kit breakdown with links'},
+  {t:'11:00 PM',type:R,prod:'Trading Tool Kit',topic:'60-sec: Trading desk + tool + platform setup tour — aesthetic BTS'},
+  {t:'3:00 AM',type:S,prod:'Trading Tool Kit',topic:'Dashboard comparison: $0 tools vs the right tools — visual proof post'},
+],story:'Poll: "What\'s your current trading platform?" MT4 / MT5 / TradingView / cTrader / Other'},
+
+{d:17,ph:'g',theme:'AI for small business + coding without code',posts:[
+  {t:'5:00 PM',type:C,prod:'AI Automation for Small Business',topic:'8 tasks every small business owner should stop doing manually — AI does all of them'},
+  {t:'11:00 PM',type:C,prod:'Become a Professional Coder With AI',topic:'How to become a professional coder with AI — no CS degree, no bootcamp'},
+  {t:'3:00 AM',type:S,prod:'AI Automation for Small Business',topic:'Quote: "AI didn\'t take jobs. It gave smart people 3 jobs worth of income."'},
+],story:'Poll: "Do you think AI will replace freelancers?" Yes / No / Only the bad ones'},
+
+{d:18,ph:'g',theme:'Shadow Operating + Brand Empire tease',posts:[
+  {t:'5:00 PM',type:C,prod:'Shadow Operating',topic:'Shadow operating: How to build income streams nobody sees coming — the method'},
+  {t:'11:00 PM',type:R,prod:'Shadow Operating',topic:'60-sec: Built 3 businesses in 1 year — dark aesthetic mysterious reveal reel'},
+  {t:'3:00 AM',type:C,prod:'Brand Empire',topic:'Brand Empire: How to build a personal brand that generates income on autopilot'},
+],story:'Blurred product teaser story — "Something big drops in 3 days." Countdown sticker'},
+
+{d:19,ph:'g',theme:'Money Challenge tease + social proof',posts:[
+  {t:'5:00 PM',type:C,prod:'Iman Gadzhi Money Challenge 2.0',topic:'The 30-day money challenge framework: From zero to first online income stream'},
+  {t:'11:00 PM',type:C,prod:'Iman Gadzhi Money Challenge 3.0',topic:'What Iman Gadzhi\'s money methodology taught me that school never did'},
+  {t:'3:00 AM',type:S,prod:'Iman Gadzhi Money Challenge 2.0',topic:'Income screenshot or testimonial: "This is possible. Full system drops tomorrow."'},
+],story:'Countdown to Phase 2. Poll: "Ready to start making real money?" LFG / Still learning / Almost'},
+
+{d:20,ph:'g',theme:'Final authority day — the big transition',posts:[
+  {t:'5:00 PM',type:C,prod:'Brand intro',topic:'20-day income system recap: All 5 pillars explained in one carousel — save this'},
+  {t:'11:00 PM',type:R,prod:'Brand intro',topic:'Day 20 transition reel: "The free content era ends. The product era begins."'},
+  {t:'3:00 AM',type:C,prod:'Brand intro',topic:'The exact products and systems behind my online income — full picture revealed'},
+],story:'"Phase 2 starts tomorrow." Hype story with bold text. DM trigger: "Reply READY"'},
+
+{d:21,ph:'m',theme:'LAUNCH — Price Action Mastery Course',posts:[
+  {t:'5:00 PM',type:C,prod:'Price Action Mastery Course',topic:'Inside Price Action Mastery Course: Full curriculum and what you\'ll achieve'},
+  {t:'11:00 PM',type:C,prod:'Price Action Mastery Course',topic:'Price Action Mastery Week 1 breakdown: What students learn and the results they get'},
+  {t:'3:00 AM',type:R,prod:'Price Action Mastery Course',topic:'Course overview reel: Chart screen recordings + student results reveal'},
+],story:'LAUNCH announcement. Countdown timer. Student DM testimonial. FAQ stories'},
+
+{d:22,ph:'m',theme:'ICT & SMC Mastery Course launch',posts:[
+  {t:'5:00 PM',type:C,prod:'ICT & SMC Mastery Course',topic:'ICT & SMC Mastery Course: Advanced trading system for serious traders — full inside look'},
+  {t:'11:00 PM',type:C,prod:'ICT & SMC Mastery Course',topic:'5 ICT concepts covered in the course with real chart examples — slide breakdown'},
+  {t:'3:00 AM',type:S,prod:'ICT & SMC Mastery Course',topic:'Student result: "From consistent losses to consistent profits in 6 weeks" — quote card'},
+],story:'Course walkthrough stories. "Already in Price Action? This is your upgrade." Founding price urgency'},
+
+{d:23,ph:'m',theme:'Trading Tool Kit + TradingView Mastery push',posts:[
+  {t:'5:00 PM',type:C,prod:'Trading Tool Kit',topic:'Trading Tool Kit: What\'s inside, why serious traders need it, and the ROI breakdown'},
+  {t:'11:00 PM',type:R,prod:'Professional TradingView Mastery',topic:'Reel: "I used TradingView wrong for 6 months — here\'s what I wish I knew"'},
+  {t:'3:00 AM',type:C,prod:'Professional TradingView Mastery',topic:'Professional TradingView Mastery Course: Full curriculum breakdown — module by module'},
+],story:'Before/after chart setup comparison. Bundle deal story: "Get both at 30% off — DM BUNDLE"'},
+
+{d:24,ph:'m',theme:'Complete 1-Strategy System — premium close',posts:[
+  {t:'5:00 PM',type:C,prod:'Complete 1 Strategy Trading System',topic:'Complete 1-Strategy System: The course that ends strategy-hopping forever — what\'s inside'},
+  {t:'11:00 PM',type:C,prod:'Complete 1 Strategy Trading System',topic:'Real student results: 6-week transformations from the Complete 1-Strategy System'},
+  {t:'3:00 AM',type:S,prod:'Complete 1 Strategy Trading System',topic:'Price anchor post: "This took me $12k in losses and 2 years to build. You get it for [price]."'},
+],story:'Live Q&A about the course. Founding price countdown. "DM 1STRATEGY for personal walkthrough"'},
+
+{d:25,ph:'m',theme:'YouTube + Instagram Automation products',posts:[
+  {t:'5:00 PM',type:C,prod:'YouTube Automation',topic:'YouTube Automation Course: Complete system to build a profitable faceless channel'},
+  {t:'11:00 PM',type:C,prod:'Instagram Automation',topic:'Instagram Automation Course: Post 4x a day, grow 40% faster, touch phone less'},
+  {t:'3:00 AM',type:R,prod:'YouTube Automation',topic:'30-day automation income result reveal — tools shown on screen throughout'},
+],story:'YouTube Automation walkthrough. Instagram Automation walkthrough. Launch pricing urgency: "72 hours left"'},
+
+{d:26,ph:'m',theme:'TikTok + Snapchat + Pinterest + Twitter Automation',posts:[
+  {t:'5:00 PM',type:C,prod:'TikTok Automation',topic:'TikTok Automation Course: Run a viral account and monetize without daily content creation'},
+  {t:'11:00 PM',type:S,prod:'Snapchat Automation',topic:'Bundle graphic: Snapchat + Pinterest + Twitter Automation — the underrated trio with pricing'},
+  {t:'3:00 AM',type:C,prod:'Twitter Automation',topic:'Full social media automation suite: Run 6 platforms with AI in 2 hours per week'},
+],story:'Platform comparison story: Which automation makes the most money? DM SUITE for bundle offer'},
+
+{d:27,ph:'m',theme:'AI Freelancing — Coder + Lead Gen launch',posts:[
+  {t:'5:00 PM',type:C,prod:'Become a Professional Coder With AI',topic:'Professional Coder With AI Course: How non-coders charge $3k/month for code'},
+  {t:'11:00 PM',type:R,prod:'AI Lead Generation',topic:'60-sec: How I use AI to code, charge clients, and automate the entire service delivery'},
+  {t:'3:00 AM',type:C,prod:'AI Lead Generation',topic:'AI Lead Generation Course: 100 leads per day fully automated — the exact system inside'},
+],story:'Student result: "First $500 client in week 1." AI freelancing bundle closes Sunday urgency'},
+
+{d:28,ph:'m',theme:'AI Copywriting + Freelance Design System',posts:[
+  {t:'5:00 PM',type:C,prod:'AI Copywriting',topic:'AI Copywriting Course: Write ads, emails, and landing pages that convert — full breakdown'},
+  {t:'11:00 PM',type:C,prod:'Freelance Client Design System',topic:'Freelance Client Design System: Get clients, deliver fast, scale to $5k/month — the map'},
+  {t:'3:00 AM',type:S,prod:'AI Copywriting',topic:'Income stack visual: AI Copy + AI Design + AI Code = $8k/month potential graphic'},
+],story:'3-course freelancing bundle: "40% off this weekend only." Student testimonials throughout'},
+
+{d:29,ph:'m',theme:'Shadow Operating + Brand Empire launch',posts:[
+  {t:'5:00 PM',type:C,prod:'Shadow Operating',topic:'Shadow Operating guide: The underground business playbook — what\'s inside and why it\'s different'},
+  {t:'11:00 PM',type:R,prod:'Brand Empire',topic:'60-sec: Brand Empire walkthrough — what\'s inside and the income transformation it creates'},
+  {t:'3:00 AM',type:C,prod:'Brand Empire',topic:'Brand Empire: Complete personal brand monetization system — module by module inside look'},
+],story:'"Shadow Operating + Brand Empire together — DM BOTH for the combo deal." Product inside look stories'},
+
+{d:30,ph:'m',theme:'How To Create High Quality Digital Products With AI',posts:[
+  {t:'5:00 PM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'Inside the course: 5-step AI digital product framework — slide 1 preview shared free'},
+  {t:'11:00 PM',type:C,prod:'How To Create High Quality Digital Products With AI',topic:'Student result: Product created in 48 hours, first sale in 72 hours — full story'},
+  {t:'3:00 AM',type:S,prod:'How To Create High Quality Digital Products With AI',topic:'Revenue proof graphic: Products built with this system — month 1 earnings shown'},
+],story:'Course inside look. "Launch price ends tonight." Student DM screenshots shown'},
+
+{d:31,ph:'m',theme:'Iman Gadzhi Money Challenge 2.0 + 3.0 launch',posts:[
+  {t:'5:00 PM',type:C,prod:'Iman Gadzhi Money Challenge 2.0',topic:'Money Challenge 2.0: 30-day system to your first $1,000 online — the full breakdown'},
+  {t:'11:00 PM',type:R,prod:'Iman Gadzhi Money Challenge 2.0',topic:'30-day money challenge result reveal reel — before/after with real numbers shown'},
+  {t:'3:00 AM',type:C,prod:'Iman Gadzhi Money Challenge 3.0',topic:'Challenge 3.0 Advanced: $1k to $5k in 30 days with systems — what\'s inside'},
+],story:'Challenge 2.0 LIVE announcement. Previous challenge student wins. Countdown to challenge start date'},
+
+{d:32,ph:'m',theme:'Bundle offers — maximum value push',posts:[
+  {t:'5:00 PM',type:C,prod:'Trading Tool Kit',topic:'Full Trading Bundle: All 5 trading products together — value breakdown vs individual pricing'},
+  {t:'11:00 PM',type:C,prod:'Instagram Automation',topic:'Full AI Income Bundle: All automation + all freelancing courses — complete business in a box'},
+  {t:'3:00 AM',type:S,prod:'Shadow Operating',topic:'Scarcity post: "Bundle pricing closes in 72 hours — screenshot this before it\'s gone"'},
+],story:'"Bundle week — biggest savings all year." Countdown timer story. "DMs open all day today"'},
+
+{d:33,ph:'m',theme:'Social proof storm — testimonials',posts:[
+  {t:'5:00 PM',type:C,prod:'Price Action Mastery Course',topic:'Student results from every product: Real screenshots, real numbers, 10 different wins'},
+  {t:'11:00 PM',type:R,prod:'Iman Gadzhi Money Challenge 2.0',topic:'Student transformation reel: Before/after quick cuts from every product — upbeat audio'},
+  {t:'3:00 AM',type:S,prod:'Complete 1 Strategy Trading System',topic:'Student DM screenshot: "I made my investment back in 3 days" — authentic proof post'},
+],story:'Share 5 student result stories back to back. Poll: "What result do you want for yourself?"'},
+
+{d:34,ph:'m',theme:'Final push — all products + urgency close',posts:[
+  {t:'5:00 PM',type:C,prod:'Brand intro',topic:'Complete product directory: Every product, every outcome, every price — one carousel'},
+  {t:'11:00 PM',type:C,prod:'Brand Empire',topic:'Last 48 hours: What your first 7 days look like after enrolling in any product'},
+  {t:'3:00 AM',type:R,prod:'Brand intro',topic:'Day 34 personal reel: "Why I built all of this" — motivational, behind the scenes'},
+],story:'"FINAL HOURS — prices go up tomorrow." Live countdown. "I\'m in DMs all day — ask me anything"'},
+
+{d:35,ph:'m',theme:'Day 35 — wrap, community, retention loop',posts:[
+  {t:'5:00 PM',type:C,prod:'Brand intro',topic:'35 days. 130 posts. The full blueprint recap carousel — save this forever'},
+  {t:'11:00 PM',type:S,prod:'Brand intro',topic:'Community post: "Tag someone this page helped in 35 days"'},
+  {t:'3:00 AM',type:C,prod:'Brand intro',topic:'What\'s coming in the next 35 days — new content, new products, the next level preview'},
+],story:'"Day 35. We did it." Drop results in DMs. Poll: "Did this 35-day journey help you?" Retention CTA for round 2'},
+];
+
+const PRODUCTS=[
+{cat:'Trading',lbl:'cat-t',name:'Price Action Mastery Course',map:'C: Days 2,21,22,33 · R: Day 21 · S: Day 2'},
+{cat:'Trading',lbl:'cat-t',name:'ICT & SMC Mastery Course',map:'C: Days 4,22,24,33 · R: Day 21 · S: Day 22'},
+{cat:'Trading',lbl:'cat-t',name:'Complete 1 Strategy Trading System',map:'C: Days 15,15,24,33 · R: Day 20 · S: Days 24,33'},
+{cat:'Trading',lbl:'cat-t',name:'Trading Tool Kit',map:'C: Days 8,16,23,32 · R: Day 16 · S: Day 16'},
+{cat:'Trading',lbl:'cat-t',name:'Professional TradingView Mastery',map:'C: Days 8,23,25,30 · R: Days 8,23 · S: Day 23'},
+{cat:'Automation',lbl:'cat-a',name:'YouTube Automation',map:'C: Days 3,9,25,32 · R: Days 25,28 · S: Day 9'},
+{cat:'Automation',lbl:'cat-a',name:'Instagram Automation',map:'C: Days 3,10,25,32 · R: Day 10 · S: Day 10'},
+{cat:'Automation',lbl:'cat-a',name:'TikTok Automation',map:'C: Days 9,26,32,34 · R: Day 9 · S: Day 26'},
+{cat:'Automation',lbl:'cat-a',name:'Snapchat Automation',map:'C: Days 10,26,32,34 · R: Day 10 · S: Day 26'},
+{cat:'Automation',lbl:'cat-a',name:'Pinterest Automation',map:'C: Days 10,26,32,34 · R: Day 10 · S: Day 26'},
+{cat:'Automation',lbl:'cat-a',name:'Twitter Automation',map:'C: Days 10,26,32,34 · R: Day 10 · S: Day 26'},
+{cat:'Freelancing',lbl:'cat-f',name:'Become a Professional Coder With AI',map:'C: Days 5,17,27,32 · R: Days 5,27 · S: Day 27'},
+{cat:'Freelancing',lbl:'cat-f',name:'AI Lead Generation',map:'C: Days 5,11,27,32 · R: Day 27 · S: Day 11'},
+{cat:'Freelancing',lbl:'cat-f',name:'AI Automation for Small Business',map:'C: Days 17,28,32,34 · R: Day 17 · S: Day 17'},
+{cat:'Freelancing',lbl:'cat-f',name:'AI Copywriting',map:'C: Days 11,28,32,34 · R: Day 28 · S: Days 11,28'},
+{cat:'Freelancing',lbl:'cat-f',name:'Freelance Client Design System',map:'C: Days 12,28,32,34 · R: Day 12 · S: Day 12'},
+{cat:'Digital',lbl:'cat-d',name:'Shadow Operating',map:'C: Days 18,29,32,34 · R: Days 18,29 · S: Days 29,32'},
+{cat:'Digital',lbl:'cat-d',name:'Brand Empire',map:'C: Days 6,18,29,34 · R: Day 29 · S: Days 6,34'},
+{cat:'Digital',lbl:'cat-d',name:'How To Create High Quality Digital Products With AI',map:'C: Days 6,13,30,33 · R: Day 13 · S: Day 30'},
+{cat:'Digital',lbl:'cat-d',name:'Iman Gadzhi Money Challenge 2.0',map:'C: Days 19,31,33,34 · R: Days 31,33 · S: Day 19'},
+{cat:'Digital',lbl:'cat-d',name:'Iman Gadzhi Money Challenge 3.0',map:'C: Days 19,31,33,34 · R: Day 31 · S: Day 19'},
+];
+
+const HOOKS=[
+{cat:'Trading hooks',items:['Nobody shows you THIS chart setup — I\'m about to.','I lost $4,000 before I learned this one rule.','This candle pattern predicted the last 5 major market moves.','Stop using 10 indicators. Here\'s what professionals actually use.','The banks already decided where price is going — here\'s how to read it.','Most traders blow accounts because they don\'t know THIS.','I\'ll show you the exact entry I used to make money this week.','Price action told me this trade was coming 3 hours early.','Every retail trader gets played by this trap. Don\'t be one of them.','The chart setup nobody on YouTube is teaching — until now.','This setup printed 3 weeks in a row. Here\'s what to look for.','I traded with 1 strategy for 90 days. Here\'s what happened to my account.','The #1 mistake that keeps retail traders poor — and it\'s not what you think.','Stop looking for the perfect entry. Look for THIS instead.','ICT changed how I see every single candle. Here\'s the shift.']},
+{cat:'AI & Automation hooks',items:['You\'re spending 20 hours on tasks AI does in 20 minutes.','I automated my entire business. Here\'s the exact stack I use.','My social media runs itself. Let me show you the system.','One workflow. Six platforms. Zero extra effort. Here\'s how.','AI doesn\'t replace you. It multiplies you. Here\'s the difference.','I post 4x a day. I\'m awake for maybe 1 of them.','The automation workflow that saved me 40 hours this month.','Most people use AI wrong. This is the right way.','This AI tool combination made manual work extinct for me.','Faceless channels are making millions. AI is why.','If you\'re not automating this in 2026 you\'re working twice as hard for half the money.','I built a content business without making content. Here\'s how.','The platform nobody automates — that\'s exactly why it prints money.','6 platforms. 2 hours a week. All AI. This is the new standard.','Your competitors are still doing this manually. That\'s your advantage.']},
+{cat:'Freelancing hooks',items:['I charged $1,500 for this. AI built it in 45 minutes.','My client doesn\'t know I use AI. The results are all they care about.','You don\'t need a degree. You need these 3 AI tools and 1 client.','First $500 client. Zero portfolio. Zero experience. Here\'s what I did.','The freelancing skill companies are paying top dollar for in 2026.','I tripled my rates by switching to this AI-powered workflow.','Cold outreach is dead. This AI lead gen method replaced it entirely.','Freelancers using AI earn 3x more than those who don\'t.','I landed a $3k/month retainer using AI. No portfolio. No agency.','The best freelancers in 2026 aren\'t the most skilled — they\'re the most automated.','100 qualified leads per day. Fully automated. Here\'s the system.','AI copy outperforms hand-written copy. I\'ll prove it in 8 slides.','I designed a full brand in 20 minutes. Here\'s what I charged.','The freelance stack nobody talks about — AI code + AI design + AI copy.','You can charge premium rates for AI work. Here\'s exactly how.']},
+{cat:'Digital product hooks',items:['I built this product once. It\'s been selling for 11 months.','Passive income isn\'t a myth. Here\'s the product that proved it.','Your knowledge is worth more than you\'re currently charging for it.','I made money while sleeping. This is the exact product.','The digital product type that outsells courses in 2026.','7 digital products you can create this weekend with AI.','Nobody talks about this product category — that\'s why it sells so well.','From idea to first sale in 72 hours. Here\'s the exact system.','This product took 4 hours to build and makes money every month.','Stop giving your knowledge away for free. Package it. Sell it. Scale it.','The brand that makes money while you\'re offline — here\'s how to build it.','Most people think digital products require skills. They don\'t require this one thing.','The underground business model the richest online entrepreneurs use.','I sell while I sleep because I built this system. Here\'s what\'s inside.','Your personal brand is your most valuable asset in 2026. Here\'s why.']},
+{cat:'Mindset & viral hooks',items:['If you\'re reading this at midnight wanting more — this account is for you.','The only difference between you and a 6-figure earner is information.','School taught me to work for money. The internet taught me to make money work.','Most people will scroll past this. The 1% will save it and act.','I\'m about to show you in the next 10 slides what took me 2 years to learn.','You\'re not broke because you\'re lazy. You\'re broke because you\'re uninformed.','Nobody is coming to save you. But this information might.','This is the post I wish I saw 3 years ago.','The algorithm is hiding this. Save it now.','You\'re 30 days away from a completely different income situation.','People ask how I afford my lifestyle. Here are the income streams.','Quit my 9-5 when passive income beat my salary. Here\'s that month.','The 3 skills that make you unfireable and unreplaceable in 2026.','I compared 6 income streams. Here\'s what actually worked for real.','Your biggest competition isn\'t other traders — it\'s your own discipline.']},
+];
+
+const CTAS=[
+{cat:'Save & Share',items:['Save this before the algorithm buries it.','Share with someone still working a 9–5.','Screenshot slide 3 — most important one.','Save this. Read it again on Sunday.','Share with a trader stuck on bad indicators.','This took 2 years to build — save it in 2 seconds.','Bookmark this post. Future you will thank you.','Send this to someone who says AI is just a trend.','Save this carousel. It\'s the entire roadmap.','Save + share = I keep posting free content like this.']},
+{cat:'Comment CTAs',items:['Comment your income goal for 2026.','Drop your level (1, 2, or 3) in the comments.','Comment which slide hit hardest for you.','Trading / AI / Digital — which do you want more of?','Drop your biggest income challenge below.','Comment "YES" if you\'re done playing small.','Tell me honestly: what\'s stopping you right now?','Comment the product you want to build first.','Drop your Instagram @ — let\'s connect.','Comment your country — building a map of where my audience is.']},
+{cat:'DM trigger CTAs',items:['DM me "PRICE ACTION" for the full trading guide.','Comment "AUTO" — I\'ll DM you the automation tool stack.','DM me "LEADS" for the AI lead gen system walkthrough.','Comment "BLUEPRINT" for the free income roadmap.','DM me "ENROLL" to join the next cohort.','Message me "TOOLS" — I\'ll send the kit checklist free.','Reply "DESIGN" for the AI design toolkit access.','Comment "PRODUCT" — I\'ll send the digital product idea generator.','DM "BUNDLE" for the multi-course exclusive deal.','Message me your biggest challenge — I read and respond to every one.']},
+{cat:'Follow CTAs',items:['Follow — this type of content drops daily here.','Follow before Instagram stops showing you my posts.','Follow + notifications on — tomorrow\'s post changes things.','Follow for the full 35-day system drop.','The next post is the one that changes everything. Follow now.','Follow if you\'re serious about building income online in 2026.','Every trader who followed and applied this is glad they did.','Turn on notifications — this account is moving fast.','Follow and tell me: what\'s your income goal this year?','Follow for free education that most people charge for.']},
+{cat:'Conversion CTAs (Phase 2)',items:['Link in bio — enrollment open right now.','DM me the product name — I\'ll send the details directly.','Founding member pricing closes Friday. Link in bio.','Limited spots — don\'t wait and regret it.','DM "ENROLL" — I\'ll walk you through what\'s right for your goals.','Price goes up in 48 hours. Link in bio.','One purchase. Lifetime access. No monthly fees. Link in bio.','Every day you wait is a day behind. Link in bio.','DM me if you have questions — I answer every single one before you buy.','The ROI on this course speaks for itself. Link in bio.']},
+];
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(id).classList.add('on');
+}
+
+function filt(type,btn){
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.day-card').forEach(c=>{
+    const ph=c.dataset.ph;
+    if(type==='all') c.style.display='';
+    else c.style.display=ph===type?'':'none';
+  });
+}
+
+function tog(id){
+  const b=document.getElementById('db'+id);
+  const c=document.getElementById('cv'+id);
+  b.classList.toggle('op');
+  c.classList.toggle('op');
+}
+
+const typeLabel={carousel:'Carousel',reel:'Reel',single:'Single'};
+const typeClass={carousel:'pc',reel:'pr',single:'ps'};
+
+function buildCal(){
+  const dl=document.getElementById('dayList');
+  let html='';
+  DAYS.forEach((d,i)=>{
+    const isFirst=d.d===1;
+    const isW2=d.d===8;
+    const isW3=d.d===15;
+    const isW4=d.d===22;
+    const isW5=d.d===29;
+    if(isFirst) html+=`<div class="phase-label ph1">Phase 1 — Days 1–20 · Growth & Authority</div>`;
+    if(d.d===21) html+=`<div class="phase-label ph2" style="margin-top:.5rem">Phase 2 — Days 21–35 · Monetization & Conversion</div>`;
+    if(isW2) html+=`<div class="week-sep">Week 2</div>`;
+    if(isW3) html+=`<div class="week-sep">Week 3</div>`;
+    if(isW4) html+=`<div class="week-sep">Week 4</div>`;
+    if(isW5) html+=`<div class="week-sep">Week 5</div>`;
+
+    const pills=d.posts.map(p=>`<span class="pill ${typeClass[p.type]}">${typeLabel[p.type]}</span>`).join('');
+
+    let rows='';
+    d.posts.forEach(p=>{
+      const mktColor = p.t==='5:00 PM' ? '#c6f135' : p.t==='11:00 PM' ? '#6fd7ff' : '#ff6b2b';
+      const mktLabel = p.t==='5:00 PM' ? 'US AM' : p.t==='11:00 PM' ? 'UK PM' : 'US PM';
+      rows+=`<div class="post-row">
+        <div class="pr-time" style="border-left:3px solid ${mktColor}">${p.t} PKT<br><span style="font-size:9px;color:${mktColor};font-weight:700">${mktLabel}</span></div>
+        <div class="pr-type"><span class="pill ${typeClass[p.type]}">${typeLabel[p.type]}</span></div>
+        <div class="pr-content">
+          <div class="pr-product">${p.prod}</div>
+          <div class="pr-topic">${p.topic}</div>
+        </div>
+      </div>`;
+    });
+
+    html+=`<div class="day-card" data-ph="${d.ph}">
+      <div class="day-head" onclick="tog(${i})">
+        <span class="dnum">Day ${d.d}</span>
+        <span class="dtheme">${d.theme}</span>
+        <span class="dtype-pills">${pills}</span>
+        <span class="chv" id="cv${i}">▾</span>
+      </div>
+      <div class="day-body" id="db${i}">
+        ${rows}
+        <div class="story-section">
+          <div class="story-label">Story Idea</div>
+          <div class="story-item">${d.story}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  dl.innerHTML=html;
+}
+
+function buildProducts(){
+  const pg=document.getElementById('prodGrid');
+  let html='';
+  PRODUCTS.forEach(p=>{
+    html+=`<div class="prod-card">
+      <span class="prod-cat ${p.lbl}">${p.cat}</span>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-days">${p.map.replace(/·/g,'<br>')}</div>
+    </div>`;
+  });
+  pg.innerHTML=html;
+}
+
+function buildHooks(){
+  const hl=document.getElementById('hookList');
+  let html='';let n=1;
+  HOOKS.forEach(g=>{
+    html+=`<div class="hook-cat">${g.cat}</div>`;
+    g.items.forEach(h=>{
+      html+=`<div class="hook-item"><span class="hook-num">${n}.</span>${h}</div>`;n++;
+    });
+  });
+  hl.innerHTML=html;
+}
+
+function buildCTAs(){
+  const cl=document.getElementById('ctaList');
+  let html='';let n=1;
+  CTAS.forEach(g=>{
+    html+=`<div class="hook-cat">${g.cat}</div>`;
+    g.items.forEach(c=>{
+      html+=`<div class="cta-item"><span class="hook-num">${n}.</span>${c}</div>`;n++;
+    });
+  });
+  cl.innerHTML=html;
+}
+
+// ===== 90-DAY UPLOAD PLAN =====
+// Carousels per day for one 30-day cycle (every day also has 1 single Post)
+const CYCLE=[2,1,2,0,2,1,1,2,1,2, 0,2,1,1,2,1,2,0,2,1, 1,2,1,2,0,2,1,1,2,1];
+const P90_BLOCKS=[
+  {cls:'ph1',label:'Days 1–30 · Growth & Authority'},
+  {cls:'ph2',label:'Days 31–60 · Monetization & Launches'},
+  {cls:'ph1',label:'Days 61–90 · Scale & Retention'},
+];
+
+function buildPlan90(){
+  const days=[];
+  for(let i=0;i<90;i++) days.push({n:i+1,c:CYCLE[i%30],p:1});
+  const totC=days.reduce((a,d)=>a+d.c,0);
+  const totP=days.reduce((a,d)=>a+d.p,0);
+  document.getElementById('p90Stats').innerHTML=
+    [[90,'Days'],[totC,'Carousels'],[totP,'Posts'],[totC+totP,'Total Uploads']]
+    .map(s=>`<div class="stat"><div class="sv">${s[0]}</div><div class="sl">${s[1]}</div></div>`).join('');
+
+  let html='';
+  for(let b=0;b<3;b++){
+    const blk=days.slice(b*30,b*30+30);
+    const bc=blk.reduce((a,d)=>a+d.c,0);
+    html+=`<div class="p90-block" data-block="${b}">
+      <div class="phase-label ${P90_BLOCKS[b].cls} p90-month" style="margin-top:${b?'1rem':'0'}">
+        <span>${P90_BLOCKS[b].label}</span>
+        <span>${bc} carousels · 30 posts · ${bc+30} uploads</span>
+      </div>
+      <div class="p90-head"><span>Day</span><span>What to upload</span><span>Total</span></div>`;
+    blk.forEach((d,i)=>{
+      if(i%7===0){
+        const wk=blk.slice(i,i+7);
+        const wt=wk.reduce((a,x)=>a+x.c+x.p,0);
+        html+=`<div class="p90-week"><span>Week ${b*4+Math.floor(i/7)+1}</span><em>${wt} uploads</em></div>`;
+      }
+      const tot=d.c+d.p;
+      const cls=tot===1?'light':tot===2?'mid':'heavy';
+      const what=(d.c?`<span class="pill pc">${d.c} Carousel${d.c>1?'s':''}</span>`:'')+`<span class="pill ps">${d.p} Post</span>`;
+      html+=`<div class="p90-row ${cls}">
+        <div class="p90-day">Day ${d.n}</div>
+        <div class="p90-what">${what}</div>
+        <div class="p90-total">${tot}<small>upload${tot>1?'s':''}</small></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  document.getElementById('p90List').innerHTML=html;
+}
+
+function filt90(b,btn){
+  document.querySelectorAll('#plan90 .fb').forEach(x=>x.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.p90-block').forEach(el=>{
+    el.style.display=(b==='all'||+el.dataset.block===b)?'':'none';
+  });
+}
+
+buildCal();buildProducts();buildHooks();buildCTAs();buildPlan90();
+</script>
